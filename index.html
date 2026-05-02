@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS220 - Data Structures and Algorithms Practice Problems</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>CS Practice Problems</h1>
+      <p>Pick a topic</p>
+    </div>
+    <button id="backBtn" class="text-btn" type="button" hidden>&larr; Back to Topics</button>
+  </header>
+
+  <main>
+    <section id="topicHome" class="topic-home" aria-label="Practice topics">
+      <button class="topic-card" data-topic="btree">B 2-3-4 Trees</button>
+      <button class="topic-card" data-topic="avl">AVL Trees</button>
+      <button class="topic-card" data-topic="redblack">Red-Black Trees</button>
+      <button class="topic-card" data-topic="heaps">Heaps</button>
+      <button class="topic-card" data-topic="unionfind">Union-Find</button>
+      <button class="topic-card" data-topic="traversal">BFS / DFS</button>
+      <button class="topic-card" data-topic="prim">Prim's</button>
+      <button class="topic-card" data-topic="kruskal">Kruskal's</button>
+      <button class="topic-card" data-topic="dijkstra">Dijkstra's</button>
+      <button class="topic-card" data-topic="bellman">Bellman-Ford</button>
+      <button class="topic-card" data-topic="hashing">Hashing</button>
+      <button class="topic-card" data-topic="bigo">Big-O</button>
+      <button class="topic-card" data-topic="choice">Algorithm Choice</button>
+    </section>
+
+    <section id="practicePage" class="practice-page" hidden>
+      <div class="practice-header">
+        <div>
+          <h2 id="topicTitle">Topic</h2>
+          <p id="topicHint">Try the slide example or generate a similar problem.</p>
+        </div>
+        <div class="mode-actions">
+          <button id="exampleBtn" type="button">Use PPTX Example</button>
+          <button id="similarBtn" type="button">Generate Similar Problem</button>
+          <button id="resetBtn" class="secondary" type="button">Reset</button>
+        </div>
+      </div>
+
+      <article id="slideProblem" class="slide"></article>
+    </section>
+  </main>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close expanded visual">X</button>
+    <div id="lightboxContent" class="lightbox-content"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
