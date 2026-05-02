@@ -553,9 +553,9 @@ function avlExampleSvg(stage = "start") {
       { id: "1", label: "1", x: 160, y: 175, bf: "0", pick: true },
       { id: "5", label: "5", x: 350, y: 175, bf: "0", pick: true },
       { id: "15", label: "15", x: 470, y: 175, mark: "Q", bf: "1", pick: true },
-      { id: "7", label: "7", x: 430, y: 245, bf: "-1", pick: true },
+      { id: "7", label: "7", x: 430, y: 245, mark: "R", bf: "-1", pick: true },
       { id: "16", label: "16", x: 520, y: 245, bf: "0", pick: true },
-      { id: "14", label: "14", x: 465, y: 285, mark: "R", bf: "0", pick: true }
+      { id: "14", label: "14", x: 465, y: 285, bf: "0", pick: true }
     ], [["4", "2"], ["4", "6"], ["2", "1"], ["6", "5"], ["6", "15"], ["15", "7"], ["15", "16"], ["7", "14"]], 620, 325);
   }
   if (stage === "right") {
@@ -574,14 +574,14 @@ function avlExampleSvg(stage = "start") {
   return svgTree([
     { id: "4", label: "4", x: 310, y: 35 },
     { id: "2", label: "2", x: 190, y: 110 },
-    { id: "15", label: "15", x: 440, y: 110 },
+    { id: "7", label: "7", x: 440, y: 110 },
     { id: "1", label: "1", x: 145, y: 185 },
     { id: "6", label: "6", x: 370, y: 185 },
-    { id: "16", label: "16", x: 515, y: 185 },
+    { id: "15", label: "15", x: 515, y: 185 },
     { id: "5", label: "5", x: 330, y: 260 },
-    { id: "7", label: "7", x: 410, y: 260 },
-    { id: "14", label: "14", x: 455, y: 260 }
-  ], [["4", "2"], ["4", "15"], ["2", "1"], ["15", "6"], ["15", "16"], ["6", "5"], ["6", "7"], ["6", "14"]], 620, 310);
+    { id: "14", label: "14", x: 475, y: 260 },
+    { id: "16", label: "16", x: 555, y: 260 }
+  ], [["4", "2"], ["4", "7"], ["2", "1"], ["7", "6"], ["7", "15"], ["6", "5"], ["15", "14"], ["15", "16"]], 620, 310);
 }
 
 function graphSvg(nodes, edges, width = 620, height = 360) {
@@ -894,7 +894,7 @@ function avlExample() {
   const avlWork = {
     p: "6",
     q: "15",
-    r: "14",
+    r: "7",
     type: "RL",
     rotation: "Right rotation on Q, then left rotation on P",
     finalRows: [
@@ -902,8 +902,11 @@ function avlExample() {
       ["root left child", "2"],
       ["root right child", "7"],
       ["left child left leaf", "1"],
-      ["right child left leaf", "6"],
-      ["right child right leaf", "15"]
+      ["right child left child", "6"],
+      ["right child right child", "15"],
+      ["6 left leaf", "5"],
+      ["15 left leaf", "14"],
+      ["15 right leaf", "16"]
     ]
   };
   return {
@@ -937,7 +940,7 @@ function avlExample() {
       "Insert 14 as a normal BST: 14 goes left of 15.",
       "Compute balance factors moving upward.",
       "The first imbalanced node is 6.",
-      "P = 6, Q = 15, R = 14.",
+      "P = 6, Q = 15, R = 7.",
       "This is a right-left case.",
       "Rotate right on 15, then rotate left on 6."
     ])}`,
