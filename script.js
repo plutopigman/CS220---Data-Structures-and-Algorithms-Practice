@@ -490,7 +490,7 @@ function svgTree(nodes, edges, width = 620, height = 310) {
 
 function btreeSlideSvg(after = false) {
   if (!after) {
-    return svgTree([
+    return btreeCaseSvg([
       { id: "20", label: "20", x: 300, y: 55 },
       { id: "5", label: "5", x: 165, y: 155 },
       { id: "304050", label: "30 | 40 | 50", x: 420, y: 155, w: 150 },
@@ -498,7 +498,7 @@ function btreeSlideSvg(after = false) {
       { id: "45", label: "45", x: 510, y: 255 }
     ], [["20", "5"], ["20", "304050"], ["304050", "35"], ["304050", "45"]], 620, 315);
   }
-  return svgTree([
+  return btreeCaseSvg([
     { id: "2040", label: "20 | 40", x: 300, y: 55, w: 105 },
     { id: "5", label: "5", x: 165, y: 155 },
     { id: "3050", label: "30 | 50", x: 455, y: 155, w: 105 },
@@ -516,7 +516,7 @@ function btreeFromLevelsSvg(root, leaves) {
     nodes.push({ id, label: leaf.join(" | "), x: 120 + i * (380 / Math.max(1, leaves.length - 1)), y: 175, w: Math.max(60, leaf.join(" | ").length * 12 + 24) });
     edges.push(["root", id]);
   });
-  return svgTree(nodes, edges, 620, 235);
+  return btreeCaseSvg(nodes, edges, 235);
 }
 
 function avlExampleSvg(stage = "start") {
@@ -671,30 +671,197 @@ function btreeExample() {
 }
 
 function btreeSimilar() {
-  const base = pick([
-    { root: [40], leaves: [[10], [50, 60, 70]], insert: 55 },
-    { root: [30], leaves: [[5, 15, 20], [45]], insert: 12 },
-    { root: [50], leaves: [[20, 30, 40], [70, 80]], insert: 35 }
-  ]);
-  const result = insert234(base.root, base.leaves, base.insert);
-  const answer = btreeText(result.root, result.leaves);
+  const c = pick(btreeGeneratedCases());
   return {
     title: "B 2-3-4 Tree Insertion",
-    prompt: `Insert ${base.insert}`,
-    visual: btreeFromLevelsSvg(base.root, base.leaves),
-    inlineInputHtml: answerTable("Tree Nodes After Insertion", ["Node", "Keys"], [["root", answerInput(result.root.join(" "), "node value")], ...result.leaves.map((leaf, i) => [`leaf ${i + 1}`, answerInput(leaf.join(" "), "node value")])]),
-    placeholder: answer,
-    answerHtml: `${btreeFromLevelsSvg(result.root, result.leaves)}<code>${answer}</code>`,
-    solutionHtml: algorithmSteps("B 2-3-4 Insertion Steps", [
-      `Search for where ${base.insert} belongs.`,
-      "If the child you need is a full 4-node, split it first.",
-      "Push the middle key up into the parent.",
-      "Continue downward into the correct leaf.",
-      `Insert ${base.insert} into the leaf.`
-    ]),
-    check: checkText(answer),
+    prompt: `Insert ${c.insert}`,
+    visual: btreeCaseSvg(c.startNodes, c.startEdges, c.height),
+    inlineInputHtml: answerTable("Tree Nodes After Insertion", ["Position", "Keys"], c.rows.map(([position, value]) => [position, answerInput(value, "node value")])),
+    placeholder: "node value",
+    answerHtml: `${btreeCaseSvg(c.finalNodes, c.finalEdges, c.height)}<code>${c.answer}</code>`,
+    solutionHtml: `${btreeCaseSvg(c.startNodes, c.startEdges, c.height)}${btreeCaseSvg(c.finalNodes, c.finalEdges, c.height)}${algorithmSteps("B 2-3-4 Insertion Steps", c.steps)}`,
+    check: checkText(c.answer),
     checkCells: true
   };
+}
+
+function btreeGeneratedCases() {
+  return [
+    {
+      insert: 105,
+      height: 360,
+      startNodes: [
+        btreeNode("root", "40", 310, 45),
+        btreeNode("left", "20", 185, 135),
+        btreeNode("right", "60 | 80", 440, 135),
+        btreeNode("l1", "10", 110, 245),
+        btreeNode("l2", "30", 250, 245),
+        btreeNode("r1", "50", 350, 245),
+        btreeNode("r2", "70", 440, 245),
+        btreeNode("r3", "90 | 100 | 110", 555, 245)
+      ],
+      startEdges: [["root", "left"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["right", "r1"], ["right", "r2"], ["right", "r3"]],
+      finalNodes: [
+        btreeNode("root", "40", 310, 45),
+        btreeNode("left", "20", 170, 135),
+        btreeNode("right", "60 | 80 | 100", 445, 135),
+        btreeNode("l1", "10", 95, 245),
+        btreeNode("l2", "30", 235, 245),
+        btreeNode("r1", "50", 320, 245),
+        btreeNode("r2", "70", 410, 245),
+        btreeNode("r3", "90", 500, 245),
+        btreeNode("r4", "105 | 110", 590, 245)
+      ],
+      finalEdges: [["root", "left"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["right", "r1"], ["right", "r2"], ["right", "r3"], ["right", "r4"]],
+      rows: [["root", "40"], ["left internal", "20"], ["right internal", "60 80 100"], ["left leaf 1", "10"], ["left leaf 2", "30"], ["right leaf 1", "50"], ["right leaf 2", "70"], ["right leaf 3", "90"], ["right leaf 4", "105 110"]],
+      answer: "[40] / [20] [60 | 80 | 100] / [10] [30] [50] [70] [90] [105 | 110]",
+      steps: ["Search from 40, then go to the 60 | 80 child.", "The leaf 90 | 100 | 110 is a full 4-node.", "Split it and promote 100 into the parent.", "Continue into the new right child because 105 is greater than 100.", "Insert 105 with 110."]
+    },
+    {
+      insert: 12,
+      height: 360,
+      startNodes: [
+        btreeNode("root", "50", 310, 45),
+        btreeNode("left", "20 | 30", 185, 135),
+        btreeNode("right", "80", 445, 135),
+        btreeNode("l1", "5 | 10 | 15", 80, 245),
+        btreeNode("l2", "25", 185, 245),
+        btreeNode("l3", "35 | 40", 285, 245),
+        btreeNode("r1", "60 | 70", 410, 245),
+        btreeNode("r2", "90", 535, 245)
+      ],
+      startEdges: [["root", "left"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["left", "l3"], ["right", "r1"], ["right", "r2"]],
+      finalNodes: [
+        btreeNode("root", "50", 310, 45),
+        btreeNode("left", "10 | 20 | 30", 185, 135),
+        btreeNode("right", "80", 445, 135),
+        btreeNode("l1", "5", 55, 245),
+        btreeNode("l2", "12 | 15", 145, 245),
+        btreeNode("l3", "25", 235, 245),
+        btreeNode("l4", "35 | 40", 325, 245),
+        btreeNode("r1", "60 | 70", 445, 245),
+        btreeNode("r2", "90", 555, 245)
+      ],
+      finalEdges: [["root", "left"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["left", "l3"], ["left", "l4"], ["right", "r1"], ["right", "r2"]],
+      rows: [["root", "50"], ["left internal", "10 20 30"], ["right internal", "80"], ["left leaf 1", "5"], ["left leaf 2", "12 15"], ["left leaf 3", "25"], ["left leaf 4", "35 40"], ["right leaf 1", "60 70"], ["right leaf 2", "90"]],
+      answer: "[50] / [10 | 20 | 30] [80] / [5] [12 | 15] [25] [35 | 40] [60 | 70] [90]",
+      steps: ["Search from 50 and move into the left child.", "Move toward the leftmost leaf.", "The leaf 5 | 10 | 15 is full, so split it.", "Promote 10 into the 20 | 30 node.", "Insert 12 into the child containing 15."]
+    },
+    {
+      insert: 32,
+      height: 360,
+      startNodes: [
+        btreeNode("root", "50", 310, 45),
+        btreeNode("left", "20 | 30 | 40", 185, 135),
+        btreeNode("right", "70", 445, 135),
+        btreeNode("l1", "10", 70, 245),
+        btreeNode("l2", "25", 155, 245),
+        btreeNode("l3", "35", 240, 245),
+        btreeNode("l4", "45", 325, 245),
+        btreeNode("r1", "60", 430, 245),
+        btreeNode("r2", "80", 535, 245)
+      ],
+      startEdges: [["root", "left"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["left", "l3"], ["left", "l4"], ["right", "r1"], ["right", "r2"]],
+      finalNodes: [
+        btreeNode("root", "30 | 50", 310, 45),
+        btreeNode("left", "20", 130, 135),
+        btreeNode("middle", "40", 310, 135),
+        btreeNode("right", "70", 490, 135),
+        btreeNode("l1", "10", 70, 245),
+        btreeNode("l2", "25", 180, 245),
+        btreeNode("m1", "32 | 35", 295, 245),
+        btreeNode("m2", "45", 400, 245),
+        btreeNode("r1", "60", 500, 245),
+        btreeNode("r2", "80", 585, 245)
+      ],
+      finalEdges: [["root", "left"], ["root", "middle"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["middle", "m1"], ["middle", "m2"], ["right", "r1"], ["right", "r2"]],
+      rows: [["root", "30 50"], ["left internal", "20"], ["middle internal", "40"], ["right internal", "70"], ["left leaf 1", "10"], ["left leaf 2", "25"], ["middle leaf 1", "32 35"], ["middle leaf 2", "45"], ["right leaf 1", "60"], ["right leaf 2", "80"]],
+      answer: "[30 | 50] / [20] [40] [70] / [10] [25] [32 | 35] [45] [60] [80]",
+      steps: ["Search from 50 and move left.", "The child 20 | 30 | 40 is a full 4-node, so split it before going down.", "Promote 30 into the root.", "Continue into the 40 child because 32 is between 30 and 50.", "Insert 32 into the leaf with 35."]
+    },
+    {
+      insert: 57,
+      height: 360,
+      startNodes: [
+        btreeNode("root", "40 | 80", 310, 45),
+        btreeNode("left", "20", 120, 135),
+        btreeNode("middle", "60", 310, 135),
+        btreeNode("right", "100", 500, 135),
+        btreeNode("l1", "10", 65, 245),
+        btreeNode("l2", "30", 165, 245),
+        btreeNode("m1", "50 | 55 | 58", 275, 245),
+        btreeNode("m2", "70", 395, 245),
+        btreeNode("r1", "90", 500, 245),
+        btreeNode("r2", "110", 585, 245)
+      ],
+      startEdges: [["root", "left"], ["root", "middle"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["middle", "m1"], ["middle", "m2"], ["right", "r1"], ["right", "r2"]],
+      finalNodes: [
+        btreeNode("root", "40 | 80", 310, 45),
+        btreeNode("left", "20", 120, 135),
+        btreeNode("middle", "55 | 60", 310, 135),
+        btreeNode("right", "100", 500, 135),
+        btreeNode("l1", "10", 65, 245),
+        btreeNode("l2", "30", 165, 245),
+        btreeNode("m1", "50", 250, 245),
+        btreeNode("m2", "57 | 58", 335, 245),
+        btreeNode("m3", "70", 420, 245),
+        btreeNode("r1", "90", 510, 245),
+        btreeNode("r2", "110", 590, 245)
+      ],
+      finalEdges: [["root", "left"], ["root", "middle"], ["root", "right"], ["left", "l1"], ["left", "l2"], ["middle", "m1"], ["middle", "m2"], ["middle", "m3"], ["right", "r1"], ["right", "r2"]],
+      rows: [["root", "40 80"], ["left internal", "20"], ["middle internal", "55 60"], ["right internal", "100"], ["left leaf 1", "10"], ["left leaf 2", "30"], ["middle leaf 1", "50"], ["middle leaf 2", "57 58"], ["middle leaf 3", "70"], ["right leaf 1", "90"], ["right leaf 2", "110"]],
+      answer: "[40 | 80] / [20] [55 | 60] [100] / [10] [30] [50] [57 | 58] [70] [90] [110]",
+      steps: ["Search from 40 | 80 and move to the middle child.", "Move toward the left leaf under 60.", "The leaf 50 | 55 | 58 is full, so split it.", "Promote 55 into the parent node.", "Insert 57 into the new child with 58."]
+    }
+  ];
+}
+
+function btreeNode(id, label, x, y) {
+  return { id, label, x, y, w: Math.max(58, String(label).length * 12 + 24) };
+}
+
+function btreeCaseSvg(nodes, edges, widthOrHeight = 330, maybeHeight = null) {
+  const width = maybeHeight === null ? 660 : widthOrHeight;
+  const height = maybeHeight === null ? widthOrHeight : maybeHeight;
+  return btreeSlotSvg(nodes, edges, width, height);
+}
+
+function btreeSlotSvg(nodes, edges, width = 660, height = 330) {
+  const childrenByParent = edges.reduce((groups, [parent, child]) => {
+    if (!groups[parent]) groups[parent] = [];
+    groups[parent].push(child);
+    return groups;
+  }, {});
+
+  Object.keys(childrenByParent).forEach((parent) => {
+    childrenByParent[parent].sort((a, b) => {
+      const nodeA = nodes.find((n) => n.id === a);
+      const nodeB = nodes.find((n) => n.id === b);
+      return (nodeA?.x || 0) - (nodeB?.x || 0);
+    });
+  });
+
+  const edgeLines = edges.map(([parentId, childId]) => {
+    const parent = nodes.find((n) => n.id === parentId);
+    const child = nodes.find((n) => n.id === childId);
+    const siblings = childrenByParent[parentId] || [];
+    const childIndex = siblings.indexOf(childId);
+    const parentWidth = parent.w || Math.max(54, String(parent.label).length * 12 + 24);
+    const childWidth = child.w || Math.max(54, String(child.label).length * 12 + 24);
+    const slotCount = Math.max(siblings.length, String(parent.label).split("|").length + 1);
+    const slotStep = parentWidth / slotCount;
+    const slotX = parent.x - parentWidth / 2 + slotStep * (childIndex + 0.5);
+    const childX = child.x + Math.max(-childWidth / 3, Math.min(childWidth / 3, slotX - child.x));
+    return `<line class="tree-edge" x1="${slotX}" y1="${parent.y + 18}" x2="${childX}" y2="${child.y - 18}"></line>`;
+  }).join("");
+
+  const nodeShapes = nodes.map((n) => {
+    const w = n.w || Math.max(54, String(n.label).length * 12 + 24);
+    const h = n.h || 36;
+    return `<rect class="node-rect graph-node" x="${n.x - w / 2}" y="${n.y - h / 2}" width="${w}" height="${h}"></rect><text x="${n.x}" y="${n.y}">${n.label}</text>`;
+  }).join("");
+
+  return `<svg class="diagram-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="B 2-3-4 tree diagram">${edgeLines}${nodeShapes}</svg>`;
 }
 
 function insert234(root, leaves, value) {
@@ -782,12 +949,7 @@ function avlExample() {
 }
 
 function avlSimilar() {
-  const cases = [
-    { type: "LL", insert: 10, p: "30", q: "20", r: "10", answer: "LL imbalance, right rotation on 30" },
-    { type: "RR", insert: 30, p: "10", q: "20", r: "30", answer: "RR imbalance, left rotation on 10" },
-    { type: "LR", insert: 20, p: "30", q: "10", r: "20", answer: "LR imbalance, left rotation on 10, right rotation on 30" },
-    { type: "RL", insert: 20, p: "10", q: "30", r: "20", answer: "RL imbalance, right rotation on 30, left rotation on 10" }
-  ];
+  const cases = avlGeneratedCases();
   const c = pick(cases);
   const avlWork = {
     p: c.p,
@@ -795,16 +957,16 @@ function avlSimilar() {
     r: c.r,
     type: c.type,
     rotation: rotationForCase(c.type),
-    finalRows: [["root", "20"], ["root left child", "10"], ["root right child", "30"]]
+    finalRows: c.finalRows
   };
   return {
     title: "AVL Tree Insertion",
     prompt: `Insert ${c.insert}`,
-    visual: `${avlCaseSvg(c.type, "practice")}${table(["Step", "Work"], [["Step 0", "Insert the Node"], ["Step 1", "Compute balance factors"], ["Step 2", "Identify P, Q, R"], ["Step 3", "Identify imbalance case"], ["Step 4", "Fix rotations"]], true)}`,
+    visual: `${avlGeneratedSvg(c, "practice")}${table(["Step", "Work"], [["Step 0", "Insert the Node"], ["Step 1", "Compute balance factors"], ["Step 2", "Identify P, Q, R"], ["Step 3", "Identify imbalance case"], ["Step 4", "Fix rotations"]], true)}`,
     inlineInputHtml: `${avlNodePickControls(avlWork)}${avlReasonTable(avlWork)}${avlFinalTreeTable(avlWork.finalRows)}`,
     placeholder: c.answer,
-    answerHtml: `<strong>${c.answer}</strong><div class="step-visuals"><div class="step-card"><p class="mini-caption">${c.type} Imbalance: P=${c.p}, Q=${c.q}, R=${c.r}</p>${avlCaseSvg(c.type, "before")}</div><div class="step-card"><p class="mini-caption">Final Balanced Tree</p>${avlCaseSvg(c.type, "after")}</div></div>`,
-    solutionHtml: `<div class="step-visuals"><div class="step-card"><p class="mini-caption">Inserted Node + BF/P/Q/R</p>${avlCaseSvg(c.type, "before")}</div><div class="step-card"><p class="mini-caption">${c.answer}</p>${avlCaseSvg(c.type, "after")}</div></div>${algorithmSteps("AVL Insertion Steps", [
+    answerHtml: `<strong>${c.answer}</strong><div class="step-visuals"><div class="step-card"><p class="mini-caption">${c.type} Imbalance: P=${c.p}, Q=${c.q}, R=${c.r}</p>${avlGeneratedSvg(c, "before")}</div><div class="step-card"><p class="mini-caption">Final Balanced Tree</p>${avlGeneratedSvg(c, "after")}</div></div>`,
+    solutionHtml: `<div class="step-visuals"><div class="step-card"><p class="mini-caption">Inserted Node + BF/P/Q/R</p>${avlGeneratedSvg(c, "before")}</div><div class="step-card"><p class="mini-caption">${c.answer}</p>${avlGeneratedSvg(c, "after")}</div></div>${algorithmSteps("AVL Insertion Steps", [
       `Insert ${c.insert} as a normal BST.`,
       "Compute balance factors from the inserted node back up.",
       `Identify the ${c.type} shape using P, Q, and R.`,
@@ -867,6 +1029,139 @@ function rotationForCase(type) {
     LR: "Left rotation on Q, then right rotation on P",
     RL: "Right rotation on Q, then left rotation on P"
   }[type];
+}
+
+function avlGeneratedCases() {
+  return [
+    {
+      type: "LL",
+      insert: 10,
+      p: "30",
+      q: "20",
+      r: "10",
+      answer: "LL imbalance, right rotation on 30",
+      nodes: [
+        { id: "30", label: "30", x: 330, y: 45, mark: "P", bf: "2", pick: true },
+        { id: "20", label: "20", x: 230, y: 120, mark: "Q", bf: "1", pick: true },
+        { id: "40", label: "40", x: 445, y: 120, pick: true },
+        { id: "10", label: "10", x: 160, y: 205, mark: "R", bf: "0", pick: true },
+        { id: "25", label: "25", x: 285, y: 205, pick: true },
+        { id: "35", label: "35", x: 405, y: 205, pick: true },
+        { id: "50", label: "50", x: 500, y: 205, pick: true }
+      ],
+      edges: [["30", "20"], ["30", "40"], ["20", "10"], ["20", "25"], ["40", "35"], ["40", "50"]],
+      finalNodes: [
+        { id: "20", label: "20", x: 330, y: 45 },
+        { id: "10", label: "10", x: 220, y: 125 },
+        { id: "30", label: "30", x: 440, y: 125 },
+        { id: "25", label: "25", x: 365, y: 210 },
+        { id: "40", label: "40", x: 505, y: 210 },
+        { id: "35", label: "35", x: 470, y: 285 },
+        { id: "50", label: "50", x: 550, y: 285 }
+      ],
+      finalEdges: [["20", "10"], ["20", "30"], ["30", "25"], ["30", "40"], ["40", "35"], ["40", "50"]],
+      finalRows: [["root", "20"], ["root left child", "10"], ["root right child", "30"], ["right child left leaf", "25"], ["right child right child", "40"], ["40 left leaf", "35"], ["40 right leaf", "50"]]
+    },
+    {
+      type: "RR",
+      insert: 70,
+      p: "30",
+      q: "50",
+      r: "70",
+      answer: "RR imbalance, left rotation on 30",
+      nodes: [
+        { id: "30", label: "30", x: 310, y: 45, mark: "P", bf: "-2", pick: true },
+        { id: "20", label: "20", x: 210, y: 120, pick: true },
+        { id: "50", label: "50", x: 420, y: 120, mark: "Q", bf: "-1", pick: true },
+        { id: "10", label: "10", x: 160, y: 205, pick: true },
+        { id: "25", label: "25", x: 260, y: 205, pick: true },
+        { id: "40", label: "40", x: 375, y: 205, pick: true },
+        { id: "70", label: "70", x: 485, y: 205, mark: "R", bf: "0", pick: true }
+      ],
+      edges: [["30", "20"], ["30", "50"], ["20", "10"], ["20", "25"], ["50", "40"], ["50", "70"]],
+      finalNodes: [
+        { id: "50", label: "50", x: 330, y: 45 },
+        { id: "30", label: "30", x: 220, y: 125 },
+        { id: "70", label: "70", x: 440, y: 125 },
+        { id: "20", label: "20", x: 155, y: 210 },
+        { id: "40", label: "40", x: 290, y: 210 },
+        { id: "10", label: "10", x: 115, y: 285 },
+        { id: "25", label: "25", x: 200, y: 285 }
+      ],
+      finalEdges: [["50", "30"], ["50", "70"], ["30", "20"], ["30", "40"], ["20", "10"], ["20", "25"]],
+      finalRows: [["root", "50"], ["root left child", "30"], ["root right child", "70"], ["left child left child", "20"], ["left child right leaf", "40"], ["20 left leaf", "10"], ["20 right leaf", "25"]]
+    },
+    {
+      type: "LR",
+      insert: 25,
+      p: "40",
+      q: "20",
+      r: "30",
+      answer: "LR imbalance, left rotation on 20, right rotation on 40",
+      nodes: [
+        { id: "40", label: "40", x: 330, y: 45, mark: "P", bf: "2", pick: true },
+        { id: "20", label: "20", x: 230, y: 120, mark: "Q", bf: "-1", pick: true },
+        { id: "60", label: "60", x: 445, y: 120, pick: true },
+        { id: "10", label: "10", x: 170, y: 205, pick: true },
+        { id: "30", label: "30", x: 285, y: 205, mark: "R", bf: "1", pick: true },
+        { id: "50", label: "50", x: 405, y: 205, pick: true },
+        { id: "70", label: "70", x: 500, y: 205, pick: true },
+        { id: "25", label: "25", x: 250, y: 285, pick: true }
+      ],
+      edges: [["40", "20"], ["40", "60"], ["20", "10"], ["20", "30"], ["60", "50"], ["60", "70"], ["30", "25"]],
+      finalNodes: [
+        { id: "30", label: "30", x: 330, y: 45 },
+        { id: "20", label: "20", x: 220, y: 125 },
+        { id: "40", label: "40", x: 440, y: 125 },
+        { id: "10", label: "10", x: 160, y: 210 },
+        { id: "25", label: "25", x: 280, y: 210 },
+        { id: "60", label: "60", x: 500, y: 210 },
+        { id: "50", label: "50", x: 455, y: 285 },
+        { id: "70", label: "70", x: 545, y: 285 }
+      ],
+      finalEdges: [["30", "20"], ["30", "40"], ["20", "10"], ["20", "25"], ["40", "60"], ["60", "50"], ["60", "70"]],
+      finalRows: [["root", "30"], ["root left child", "20"], ["root right child", "40"], ["left child left leaf", "10"], ["left child right leaf", "25"], ["right child right child", "60"], ["60 left leaf", "50"], ["60 right leaf", "70"]]
+    },
+    {
+      type: "RL",
+      insert: 45,
+      p: "30",
+      q: "60",
+      r: "40",
+      answer: "RL imbalance, right rotation on 60, left rotation on 30",
+      nodes: [
+        { id: "30", label: "30", x: 310, y: 45, mark: "P", bf: "-2", pick: true },
+        { id: "20", label: "20", x: 205, y: 120, pick: true },
+        { id: "60", label: "60", x: 425, y: 120, mark: "Q", bf: "1", pick: true },
+        { id: "10", label: "10", x: 155, y: 205, pick: true },
+        { id: "25", label: "25", x: 255, y: 205, pick: true },
+        { id: "40", label: "40", x: 375, y: 205, mark: "R", bf: "-1", pick: true },
+        { id: "70", label: "70", x: 495, y: 205, pick: true },
+        { id: "45", label: "45", x: 415, y: 285, pick: true }
+      ],
+      edges: [["30", "20"], ["30", "60"], ["20", "10"], ["20", "25"], ["60", "40"], ["60", "70"], ["40", "45"]],
+      finalNodes: [
+        { id: "40", label: "40", x: 330, y: 45 },
+        { id: "30", label: "30", x: 220, y: 125 },
+        { id: "60", label: "60", x: 440, y: 125 },
+        { id: "20", label: "20", x: 155, y: 210 },
+        { id: "45", label: "45", x: 380, y: 210 },
+        { id: "70", label: "70", x: 500, y: 210 },
+        { id: "10", label: "10", x: 115, y: 285 },
+        { id: "25", label: "25", x: 200, y: 285 }
+      ],
+      finalEdges: [["40", "30"], ["40", "60"], ["30", "20"], ["60", "45"], ["60", "70"], ["20", "10"], ["20", "25"]],
+      finalRows: [["root", "40"], ["root left child", "30"], ["root right child", "60"], ["left child left child", "20"], ["right child left leaf", "45"], ["right child right leaf", "70"], ["20 left leaf", "10"], ["20 right leaf", "25"]]
+    }
+  ];
+}
+
+function avlGeneratedSvg(c, stage) {
+  if (stage === "after") return svgTree(c.finalNodes, c.finalEdges, 620, 330);
+  const nodes = stage === "practice"
+    ? c.nodes.map((node) => ({ ...node, mark: "", bf: "", pick: true }))
+    : c.nodes;
+  return svgTree(nodes, c.edges, 620, 330);
 }
 
 function avlCaseSvg(type, stage) {
@@ -1436,14 +1731,36 @@ function primSimilar() {
 }
 
 function kruskalExample() {
-  return kruskalSimilar();
+  const graph = {
+    nodes: ["A", "B", "C", "D", "E", "F"],
+    edges: [
+      { u: "A", v: "B", w: 7 },
+      { u: "A", v: "C", w: 3 },
+      { u: "B", v: "C", w: 2 },
+      { u: "B", v: "D", w: 6 },
+      { u: "C", v: "D", w: 4 },
+      { u: "C", v: "E", w: 8 },
+      { u: "D", v: "E", w: 5 },
+      { u: "D", v: "F", w: 9 },
+      { u: "E", v: "F", w: 1 }
+    ]
+  };
+  return kruskalProblem(graph);
 }
 
 function kruskalSimilar() {
-  const graph = weightedGraph(6);
+  const graph = weightedGraph(6, 4);
+  return kruskalProblem(graph);
+}
+
+function kruskalProblem(graph) {
   const result = kruskalRun(graph.nodes, graph.edges);
   const answer = result.selected.map((e) => `${e.u}${e.v}`).join(" ");
-  const selectedRows = result.selected.map((e, i) => [i + 1, `${e.u}${e.v}`, result.selected.slice(0, i + 1).map((edge) => edge.u + edge.v).join(" ")]);
+  const selectedRows = result.selected.map((e, i) => [
+    i + 1,
+    `${e.u}${e.v}`,
+    kruskalVertexSet(result.selected.slice(0, i + 1))
+  ]);
   const edgeChoices = selectedRows.map((r) => r[1]);
   const setChoices = selectedRows.map((r) => r[2]);
   return {
@@ -1459,14 +1776,28 @@ function kruskalSimilar() {
   };
 }
 
-function weightedGraph(size) {
+function kruskalVertexSet(edges) {
+  return [...new Set(edges.flatMap((edge) => [edge.u, edge.v]))].sort().join(",");
+}
+
+function weightedGraph(size, extraEdges = size) {
   const nodes = "ABCDEF".slice(0, size).split("");
   const edges = [];
-  for (let i = 0; i < nodes.length - 1; i++) edges.push({ u: nodes[i], v: nodes[i + 1], w: rand(1, 9) });
-  for (let i = 0; i < size; i++) {
+  const usedWeights = new Set();
+  const nextWeight = () => {
+    let weight = rand(1, 18);
+    while (usedWeights.has(weight)) weight = rand(1, 18);
+    usedWeights.add(weight);
+    return weight;
+  };
+  for (let i = 0; i < nodes.length - 1; i++) edges.push({ u: nodes[i], v: nodes[i + 1], w: nextWeight() });
+  const targetEdges = Math.min((size * (size - 1)) / 2, nodes.length - 1 + extraEdges);
+  let guard = 0;
+  while (edges.length < targetEdges && guard < 80) {
+    guard++;
     const u = pick(nodes);
     const v = pick(nodes);
-    if (u !== v && !edges.some((e) => sameEdge(e, u, v))) edges.push({ u, v, w: rand(2, 14) });
+    if (u !== v && !edges.some((e) => sameEdge(e, u, v))) edges.push({ u, v, w: nextWeight() });
   }
   return { nodes, edges };
 }
